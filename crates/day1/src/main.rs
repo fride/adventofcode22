@@ -4,13 +4,12 @@ fn find_the_food_elf<A: Iterator<Item = String>>(calories: A) -> (u32, u32) {
     let (_, _, number, calories) =
         calories.fold((1, 0, 0, 0), |mut acc: (u32, u32, u32, u32), line| {
             if line.is_empty() {
-                acc.0 = acc.0 + 1;
+                acc.0 += 1;
                 acc.1 = 0;
             } else {
-                acc.1 = acc.1
-                    + line
-                        .parse::<u32>()
-                        .expect(&format!("Failed to parse `{}` as u32", &line));
+                acc.1 += line
+                    .parse::<u32>()
+                    .unwrap_or_else(|_| panic!("Failed to parse `{}` as u32", &line));
                 if acc.3 < acc.1 {
                     acc.2 = acc.0;
                     acc.3 = acc.1;
@@ -26,7 +25,7 @@ fn main() -> io::Result<()> {
     let path = args
         .get(1)
         .cloned()
-        .unwrap_or("./crates/day1/calories.txt".to_string());
+        .unwrap_or_else(|| "./crates/day1/calories.txt".to_string());
     let file = std::fs::File::open(path)?;
     let lines = io::BufReader::new(file).lines();
     let (number, calories) = find_the_food_elf(lines.filter_map(|line| line.ok()));
