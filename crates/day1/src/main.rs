@@ -1,25 +1,28 @@
 use std::io::{self, BufRead};
-// finds the elf carrying the most calories (aka Sugar) around.
-fn find_the_food_elf<A: Iterator<Item = String>>(calories: A) -> (u32, u32) {
-    let (_, _, number, calories) =
-        calories.fold((1, 0, 0, 0), |mut acc: (u32, u32, u32, u32), line| {
+
+fn find_the_food_elf<A: Iterator<Item = String>>(calories: A) -> Vec<(usize,u32)> {
+    let mut sums =
+        calories.fold(vec![(1,0)], |mut acc, line| {
+            let last = acc.len() -1;
             if line.is_empty() {
-                acc.0 += 1;
-                acc.1 = 0;
+                acc.push((last+2, 0)); // we count starting with one, not zero. ;)
             } else {
-                acc.1 += line
+                let calories= line
                     .parse::<u32>()
                     .unwrap_or_else(|_| panic!("Failed to parse `{}` as u32", &line));
-                if acc.3 < acc.1 {
-                    acc.2 = acc.0;
-                    acc.3 = acc.1;
+                if let Some(last)  = acc.last_mut() {
+                    last.1 += calories;
                 }
             }
             acc
         });
-    (number, calories)
+    sums.sort_by(|a,b| b.1.cmp(&a.1));
+    sums
 }
 
+//
+// solve day one riddle https://adventofcode.com/2022/day/1
+//
 fn main() -> io::Result<()> {
     let args: Vec<String> = std::env::args().into_iter().collect();
     let path = args
@@ -28,8 +31,16 @@ fn main() -> io::Result<()> {
         .unwrap_or_else(|| "./crates/day1/calories.txt".to_string());
     let file = std::fs::File::open(path)?;
     let lines = io::BufReader::new(file).lines();
-    let (number, calories) = find_the_food_elf(lines.filter_map(|line| line.ok()));
-    print!("Elf {} is carrying {} calories", number, calories);
+    let calories = find_the_food_elf(lines.filter_map(|line| line.ok()));
+    let (numbers,_) = calories.split_at(3);
+    println!("Elves: {:?}", numbers.iter()
+        .map(|elf| format!("{} has {}", elf.0, elf.1))
+        .collect::<Vec<String>>()
+        .join(","));
+    println!("Available calories: {}", numbers
+        .iter()
+        .fold(0, |acc,c| acc + c.1)
+    );
     Ok(())
 }
 
@@ -37,11 +48,15 @@ fn main() -> io::Result<()> {
 mod tests {
 
     #[test]
-    fn the_food_elf_is_found() {
-        let lines_of_sweets = ["12", "2323", "223", "", "433", "986", "", "1", "4"];
-        let (line, calories) =
-            super::find_the_food_elf(lines_of_sweets.into_iter().map(|c| c.to_string()));
-        assert_eq!(1, line);
-        assert_eq!(2558, calories);
+    fn the_food_elves_are_found() {
+        let lines_of_sweets = ["1", "1", "1", "", "12", "2323", "223", "", "433", "986", "", "1", "4"];
+        let calories =
+             super::find_the_food_elf(lines_of_sweets.into_iter().map(|c| c.to_string()));
+        assert_eq!(calories, vec![
+            (2,2558),
+            (3,1419),
+            (4,5),
+            (1,3),
+        ]);
     }
 }
