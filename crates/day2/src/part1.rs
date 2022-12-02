@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Error};
-use std::collections::BTreeMap;
+
 
 fn shape_points(shape: char) -> Result<u32, Error> {
     match shape {
@@ -12,7 +12,7 @@ fn shape_points(shape: char) -> Result<u32, Error> {
 
 fn win_points(opponent: char, player: char) -> Result<u32, Error> {
     match (opponent, player) {
-        ('A', 'X') => Ok(3),
+        ('A', 'X') => Ok(3), // A, A
         ('A', 'Y') => Ok(6),
         ('A', 'Z') => Ok(0),
         ('B', 'X') => Ok(0),
@@ -44,7 +44,7 @@ fn score_round(round: &str) -> Result<u32, Error> {
 
 pub fn calculate_scores<A: Iterator<Item = String>>(lines: A) -> Result<u32, Error> {
     let mut score = 0;
-    for (count, line) in lines.into_iter().enumerate() {
+    for (_count, line) in lines.into_iter().enumerate() {
         score += score_round(&line)?;
     }
     Ok(score)

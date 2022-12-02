@@ -1,5 +1,34 @@
-use anyhow::{anyhow, Context, Error};
-use std::str::FromStr;
+use anyhow::{anyhow, Error};
+
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum Strategy {
+    Win,
+    Draw,
+    Lose,
+}
+impl Strategy {
+    pub fn get_shape(&self, opponents_shape: Shape) -> Shape {
+        match self {
+            Strategy::Win => opponents_shape.looses_against(),
+            Strategy::Draw => opponents_shape.clone(),
+            Strategy::Lose => opponents_shape.wins_against(),
+        }
+    }
+}
+
+impl TryFrom<char> for Strategy {
+    type Error = Error;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            'X' => Ok(Strategy::Lose),
+            'Y' => Ok(Strategy::Draw),
+            'Z' => Ok(Strategy::Win),
+            _ => Err(anyhow!("Invalid strategy: {}", value)),
+        }
+    }
+}
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum RoundResult {
@@ -14,8 +43,22 @@ pub enum Shape {
     Paper = 2,
     Scissors = 3,
 }
-
 impl Shape {
+    pub fn wins_against(&self) -> Shape {
+        match self {
+            Shape::Rock => Shape::Scissors,
+            Shape::Paper => Shape::Rock,
+            Shape::Scissors => Shape::Paper,
+        }
+    }
+    pub fn looses_against(&self) -> Shape {
+        match self {
+            Shape::Rock => Shape::Paper,
+            Shape::Paper => Shape::Scissors,
+            Shape::Scissors => Shape::Rock,
+        }
+    }
+
     pub fn result(&self, other: &Shape) -> RoundResult {
         match &self {
             Shape::Rock => match other {
@@ -60,25 +103,8 @@ pub struct Round {
 impl Round {
     pub fn score(&self) -> (RoundResult, u8) {
         let result = self.player.result(&self.opponent);
-        let score_for_shape = self.player as u8;
+        let _score_for_shape = self.player as u8;
         (result, self.player as u8 + result as u8)
-    }
-}
-impl FromStr for Round {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let opponent: Shape = s
-            .chars()
-            .nth(0)
-            .ok_or(anyhow!("First player not found"))
-            .and_then(|c| c.try_into())?;
-        let player: Shape = s
-            .chars()
-            .nth(2)
-            .ok_or(anyhow!("Second player not found"))
-            .and_then(|c| c.try_into())?;
-        Ok(Round { opponent, player })
     }
 }
 
@@ -88,11 +114,54 @@ impl Game {
     pub fn score(&self) -> u32 {
         self.0.iter().map(|r| r.score().1 as u32).sum()
     }
+    pub fn parse<P, A>(lines: A, round_parser: P) -> Result<Self, Error>
+    where
+        A: Iterator<Item = String>,
+        P: Fn(String) -> Result<Round, Error>,
+    {
+        let mut rounds = vec![];
+        for line in lines {
+            // using for as we can use the nice ? macro then!
+            rounds.push(round_parser(line)?);
+        }
+        Ok(Game(rounds))
+    }
 }
+
 impl From<Vec<Round>> for Game {
     fn from(rounds: Vec<Round>) -> Self {
         Game(rounds)
     }
+}
+pub fn parse_part_one(line: String) -> Result<Round, Error> {
+    let opponent: Shape = line
+        .chars()
+        .nth(0)
+        .ok_or(anyhow!("First player not found"))
+        .and_then(|c| c.try_into())?;
+    let player: Shape = line
+        .chars()
+        .nth(2)
+        .ok_or(anyhow!("Second player not found"))
+        .and_then(|c| c.try_into())?;
+    Ok(Round { opponent, player })
+}
+
+pub fn parse_part_two(line: String) -> Result<Round, Error> {
+    let opponent: Shape = line
+        .chars()
+        .nth(0)
+        .ok_or(anyhow!("First player not found"))
+        .and_then(|c| c.try_into())?;
+    let strategy: Strategy = line
+        .chars()
+        .nth(2)
+        .ok_or(anyhow!("Second player not found"))
+        .and_then(|c| c.try_into())?;
+    Ok(Round {
+        opponent,
+        player: strategy.get_shape(opponent),
+    })
 }
 
 #[cfg(test)]
@@ -105,10 +174,7 @@ mod tests {
 
     #[test]
     fn parsing_works() {
-        let rounds: Vec<Round> = test_data().into_iter().fold(vec![], |mut acc, line| {
-            acc.push(line.parse::<Round>().unwrap());
-            acc
-        });
+        let game = Game::parse(test_data().iter().map(|s| s.to_string()), parse_part_one).unwrap();
         assert_eq!(
             vec![
                 Round {
@@ -124,24 +190,39 @@ mod tests {
                     player: Shape::Scissors
                 },
             ],
-            rounds
+            game.0
         );
     }
 
     #[test]
     fn scoring_works() {
-        let rounds: Vec<(RoundResult, u8)> =
-            test_data().into_iter().fold(vec![], |mut acc, line| {
-                acc.push(line.parse::<Round>().unwrap().score());
-                acc
-            });
+        let game = Game::parse(test_data().iter().map(|s| s.to_string()), parse_part_one).unwrap();
+        let results: Vec<(RoundResult, u8)> = game.0.iter().map(|r| r.score()).collect();
         assert_eq!(
             vec![
                 (RoundResult::MeWon, 8),
                 (RoundResult::TheOtherElfWon, 1),
                 (RoundResult::Draw, 6),
             ],
-            rounds
+            results
         );
+        assert_eq!(15, game.score())
+    }
+
+    #[test]
+    pub fn part_two_test() {
+        let input = vec!["A Y", "B X", "C Z"];
+        let game = Game::parse(input.iter().map(|s| s.to_string()), parse_part_two).unwrap();
+        let results: Vec<(RoundResult, u8)> = game.0.iter().map(|r| r.score()).collect();
+        assert_eq!(
+            vec![
+                (RoundResult::Draw, 4),
+                (RoundResult::TheOtherElfWon, 1),
+                (RoundResult::MeWon, 7),
+            ],
+            results
+        );
+
+        assert_eq!(12, game.score());
     }
 }

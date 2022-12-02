@@ -1,9 +1,9 @@
-use crate::part_one_with_types::{Game, Round};
-use anyhow::{anyhow, Context, Error};
+use crate::part_one_with_types::{Game};
+use anyhow::{anyhow, Error};
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Lines};
 use std::path::Path;
-use std::str::{FromStr, Split};
+
 
 pub mod part1;
 pub mod part_one_with_types;
@@ -20,21 +20,33 @@ fn main() -> Result<(), Error> {
         .get(1)
         .cloned()
         .unwrap_or_else(|| "./inputs/day2/secret_strategy.txt".to_string());
-    let lines = get_input(path.clone())?;
-    let game: Game = lines
-        .into_iter()
-        .filter_map(|line| line.ok())
-        .map(|line| {
-            line.parse()
-                .unwrap_or_else(|err| panic!("Failed to parse round: {}", err))
+    let lines: Vec<String> = get_input(path.clone())?
+        .filter_map(|res| match res {
+            Ok(line) => Some(line),
+            Err(err) => panic!("Failed to read input file: {}", err),
         })
-        .collect::<Vec<Round>>()
-        .into();
+        .collect();
+
+    // part one
+    let game = Game::parse(
+        lines.clone().into_iter(),
+        part_one_with_types::parse_part_one,
+    )?;
     println!("Sum for this game is {}", game.score());
 
-    let lines = get_input(path.clone())?;
-    let score = part1::calculate_scores(lines.into_iter().filter_map(|l| l.ok()))?;
-
+    // part one with the minimalistic code
+    let score = part1::calculate_scores(lines.clone().into_iter())?;
     println!("Sum for this game is {}", score);
+
+    // part tow
+    let game = Game::parse(
+        lines.clone().into_iter(),
+        part_one_with_types::parse_part_two,
+    )?;
+    println!(
+        "Sum for this game when using the awesome strategy is {}",
+        game.score()
+    );
+
     Ok(())
 }
