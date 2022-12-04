@@ -1,0 +1,4 @@
+
+* Nixos
+I uses nix to install Ocaml and Dune. The `shell.nix` file is based on [[https://blog.jethro.dev/posts/ocaml_emacs_nixos/][this blog post]]
+And of course it did not work because gcc: https://nixos.wiki/wiki/Using_Clang_instead_of_GCC
