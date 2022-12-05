@@ -1,4 +1,26 @@
-use std::io::{self, BufRead};
+use anyhow::Error;
+
+pub fn part1(lines: Vec<String>) -> Result<String, Error> {
+    let calories = find_the_food_elf(lines.into_iter());
+    let (numbers, _) = calories.split_at(3);
+    Ok(format!(
+        "Elves: {:?}",
+        numbers
+            .iter()
+            .map(|elf| format!("{} has {}", elf.0, elf.1))
+            .collect::<Vec<String>>()
+            .join(",")
+    ))
+}
+
+pub fn part2(lines: Vec<String>) -> Result<String, Error> {
+    let calories = find_the_food_elf(lines.into_iter());
+    let (numbers, _) = calories.split_at(3);
+    Ok(format!(
+        "Available calories: {}",
+        numbers.iter().fold(0, |acc, c| acc + c.1)
+    ))
+}
 
 fn find_the_food_elf<A: Iterator<Item = String>>(calories: A) -> Vec<(usize, u32)> {
     let mut sums = calories.fold(vec![(1, 0)], |mut acc, line| {
@@ -17,34 +39,6 @@ fn find_the_food_elf<A: Iterator<Item = String>>(calories: A) -> Vec<(usize, u32
     });
     sums.sort_by(|a, b| b.1.cmp(&a.1));
     sums
-}
-
-//
-// solve day one riddle https://adventofcode.com/2022/day/1
-//
-fn main() -> io::Result<()> {
-    let args: Vec<String> = std::env::args().into_iter().collect();
-    let path = args
-        .get(1)
-        .cloned()
-        .unwrap_or_else(|| "./crates/day1/day1.txt".to_string());
-    let file = std::fs::File::open(path)?;
-    let lines = io::BufReader::new(file).lines();
-    let calories = find_the_food_elf(lines.filter_map(|line| line.ok()));
-    let (numbers, _) = calories.split_at(3);
-    println!(
-        "Elves: {:?}",
-        numbers
-            .iter()
-            .map(|elf| format!("{} has {}", elf.0, elf.1))
-            .collect::<Vec<String>>()
-            .join(",")
-    );
-    println!(
-        "Available calories: {}",
-        numbers.iter().fold(0, |acc, c| acc + c.1)
-    );
-    Ok(())
 }
 
 #[cfg(test)]

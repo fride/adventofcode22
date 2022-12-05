@@ -19,7 +19,7 @@ fn main() -> Result<(), Error> {
     let path = args
         .get(1)
         .cloned()
-        .unwrap_or_else(|| "./inputs/day2/secret_strategy.txt".to_string());
+        .unwrap_or_else(|| "./inputs/day2/day2.txt".to_string());
     let lines: Vec<String> = get_input(path.clone())?
         .filter_map(|res| match res {
             Ok(line) => Some(line),
