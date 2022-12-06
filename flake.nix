@@ -18,8 +18,18 @@
         # Now how I build the flix thing here!?
       in
       {
+        default = pkgs.mkDerivation {
+           name = "flake";
+           installPhase = ''
+             mkdir -p $out
+             cp $src $out
+           '';
+        };
         devShell = pkgs.mkShell {
             buildInputs = with pkgs; [ jdk  ];
+            shellHook = ''
+                alias flix="java -jar '${flix-jar}'"
+            '';
         };
       });
 }

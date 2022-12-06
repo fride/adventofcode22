@@ -47,7 +47,6 @@ impl Display for Crates {
 }
 impl Crates {
     pub fn move_crates(&mut self, crates_move: Move, keep_order: bool) {
-        println!("{} : {}", crates_move.from, crates_move.to);
         let [source, taget] = self
             .0
             .get_many_mut([&crates_move.from, &crates_move.to])
