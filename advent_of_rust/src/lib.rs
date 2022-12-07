@@ -1,5 +1,6 @@
 extern crate core;
 
+use std::env;
 use std::io::{self, BufRead};
 
 use std::path::Path;
@@ -15,7 +16,10 @@ pub fn get_file_path() -> String {
 }
 
 pub fn get_input<P: AsRef<Path>>(path: P) -> Result<Vec<String>, Error> {
-    let file = std::fs::File::open(&path).map_err(|e| anyhow!("Failed to open file {}", e))?;
+    let curPath = env::current_dir()?;
+    println!("The current directory is {}", curPath.display());
+    let file = std::fs::File::open(&path)
+        .map_err(|e| anyhow!("Failed to open file '{:?}'. {}", path.as_ref(), e))?;
     let lines = io::BufReader::new(file).lines();
     Ok(lines.filter_map(|line| line.ok()).collect::<Vec<String>>())
 }

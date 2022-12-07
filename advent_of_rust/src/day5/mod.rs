@@ -129,7 +129,7 @@ fn parse_input(input: Vec<String>) -> (Crates, Vec<Move>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use iter_tools::Itertools;
+    
 
     const TEST_INPUT: &'static str = r###"    [D]
 [N] [C]

@@ -16,8 +16,8 @@ fn index_of_marker(text: &str, length: usize) -> Option<usize> {
     for idx in 0..text.len() {
         if idx + length > text.len() {
             return None;
-        } else if text[idx..(idx+length)].chars().sorted().dedup().count() == length {
-            return Some(idx+length);
+        } else if text[idx..(idx + length)].chars().sorted().dedup().count() == length {
+            return Some(idx + length);
         }
     }
     None
@@ -29,12 +29,24 @@ mod tests {
 
     #[test]
     pub fn test_examples_4() {
-        assert_eq!(index_of_marker("bvwbjplbgvbhsrlpgdmjqwftvncz", 4), Some((5)));
-        assert_eq!(index_of_marker("nppdvjthqldpwncqszvftbrmjlhg", 4), Some((6)));
+        assert_eq!(
+            index_of_marker("bvwbjplbgvbhsrlpgdmjqwftvncz", 4),
+            Some(5)
+        );
+        assert_eq!(
+            index_of_marker("nppdvjthqldpwncqszvftbrmjlhg", 4),
+            Some(6)
+        );
     }
     #[test]
     pub fn test_examples_14() {
-        assert_eq!(index_of_marker("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 14), Some((26)));
-        assert_eq!(index_of_marker("bvwbjplbgvbhsrlpgdmjqwftvncz", 14), Some((23)));
+        assert_eq!(
+            index_of_marker("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 14),
+            Some(26)
+        );
+        assert_eq!(
+            index_of_marker("bvwbjplbgvbhsrlpgdmjqwftvncz", 14),
+            Some(23)
+        );
     }
 }
