@@ -129,7 +129,6 @@ fn parse_input(input: Vec<String>) -> (Crates, Vec<Move>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
 
     const TEST_INPUT: &'static str = r###"    [D]
 [N] [C]

@@ -29,14 +29,8 @@ mod tests {
 
     #[test]
     pub fn test_examples_4() {
-        assert_eq!(
-            index_of_marker("bvwbjplbgvbhsrlpgdmjqwftvncz", 4),
-            Some(5)
-        );
-        assert_eq!(
-            index_of_marker("nppdvjthqldpwncqszvftbrmjlhg", 4),
-            Some(6)
-        );
+        assert_eq!(index_of_marker("bvwbjplbgvbhsrlpgdmjqwftvncz", 4), Some(5));
+        assert_eq!(index_of_marker("nppdvjthqldpwncqszvftbrmjlhg", 4), Some(6));
     }
     #[test]
     pub fn test_examples_14() {
