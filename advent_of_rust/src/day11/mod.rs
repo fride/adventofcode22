@@ -194,22 +194,14 @@ pub fn parse_monkeys(input: &str) -> Vec<Monkey> {
     parse_value(MonkeyParser::parse(Rule::monkeys, input).unwrap())
 }
 pub fn do_monkey_dance(mut monkeys: BTreeMap<u32, Monkey>) -> BTreeMap<u32, Monkey> {
-    fn get_actions(monkeys: & mut BTreeMap<u32, Monkey>) -> Vec<(Action, i64)> {
-        monkeys.values_mut()
-            .flat_map(|monkey| monkey.do_monkey_things())
-            .collect()
-    }
-    let actions = get_actions(&mut monkeys);
-    for action in actions {
-        match action {
-            (Action::ThrowToMonkey(target), worry_level) => {
-                if let Some(monkey) = monkeys.get_mut(&target) {
-                    monkey.starting.push(worry_level);
-                } else {
-                    println!("Invalid target!")
-                }
-            }
-            _ => panic!("HUPS") // should not happen in part1 ;)
+
+    let ids : Vec<u32> = monkeys.keys().cloned().collect();
+    for monkey_id in ids {
+        let current_monkey = monkeys.get_mut(&monkey_id).unwrap();
+        let actions = current_monkey.do_monkey_things();
+        for (Action::ThrowToMonkey(target), item) in actions {
+            let target = monkeys.get_mut(&target).unwrap();
+            target.starting.push(item);
         }
     }
     monkeys
@@ -257,7 +249,11 @@ Monkey 3:
 
         // round one
         monkeys = do_monkey_dance(monkeys);
+        let empty: Vec<i64> = vec![];
         assert_eq!(&vec![20, 23, 27, 26], &monkeys[&0].starting);
+        assert_eq!(&empty, &monkeys[&2].starting);
+        assert_eq!(&empty, &monkeys[&3].starting);
+        assert_eq!(&vec![2080, 25, 167, 207, 401, 1046], &monkeys[&1].starting);
 
     }
 }
