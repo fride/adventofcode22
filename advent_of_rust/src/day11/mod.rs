@@ -68,7 +68,7 @@ impl Test {
     pub fn check_item(&self, item: &i64) -> bool {
         match self {
             Test::DivisibleBy(value) => {
-                value & item == 0
+                item % value  == 0
             }
         }
     }
@@ -82,7 +82,7 @@ pub enum BinOpp {
     Divide,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum  Action {
     ThrowToMonkey(u32)
 }
@@ -205,8 +205,8 @@ pub fn do_monkey_dance(mut monkeys: BTreeMap<u32, Monkey>) -> BTreeMap<u32, Monk
         }
     }
     monkeys
-
 }
+
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
@@ -251,9 +251,28 @@ Monkey 3:
         monkeys = do_monkey_dance(monkeys);
         let empty: Vec<i64> = vec![];
         assert_eq!(&vec![20, 23, 27, 26], &monkeys[&0].starting);
+        assert_eq!(&vec![2080, 25, 167, 207, 401, 1046], &monkeys[&1].starting);
         assert_eq!(&empty, &monkeys[&2].starting);
         assert_eq!(&empty, &monkeys[&3].starting);
-        assert_eq!(&vec![2080, 25, 167, 207, 401, 1046], &monkeys[&1].starting);
 
+    }
+
+    #[test]
+    pub fn test_mod() {
+        // Monkey inspects an item with a worry level of  60
+        // New worry level is 3600.
+        // Monkey gets bored with item. Worry level is divided by 3 to 1200.
+        // Item is thrown to ThrowToMonkey(1)
+        let mut monkey =Monkey {
+            id:2,
+            number_of_inspected_items: 0,
+            starting: vec![60],
+            operation: Operation::Square,
+            test: Test::DivisibleBy(3),
+            if_true: Action::ThrowToMonkey(1),
+            if_false: Action::ThrowToMonkey(3),
+        };
+        let action = monkey.do_monkey_things();
+        assert_eq!(vec![(Action::ThrowToMonkey(3), 1200 as i64)], action)
     }
 }
