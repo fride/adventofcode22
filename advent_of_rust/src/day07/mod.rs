@@ -1,13 +1,6 @@
 use anyhow::{Error};
 
 
-
-
-
-
-
-
-
 mod parser;
 mod with_map;
 mod with_trie;
@@ -76,25 +69,4 @@ $ ls
 5626152 d.ext
 7214296 k"###;
 
-    #[test]
-    pub fn parser_test() {
-        let res = super::parser().parse("$ cd /").unwrap();
-        assert_eq!(Expr::Cd("/".to_string()), res);
-    }
-    #[test]
-    pub fn schmu() {
-        let res: Vec<Expr> =
-            parse_input(TEST_INPUT.split("\n").map(|c| c.to_string()).collect()).unwrap();
-        let _sizes = create_file_tree(res);
-    }
-    #[test]
-    pub fn parse_example_test() {
-        let res: Vec<Expr> =
-            parse_input(TEST_INPUT.split("\n").map(|c| c.to_string()).collect()).unwrap();
-        let file_tree = create_file_tree(res);
-        println!("{}", file_tree);
-        let sizes = file_tree.part1();
-        println!("{}", sizes);
-        assert_eq!(95437, sizes);
-    }
 }

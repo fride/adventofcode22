@@ -1,4 +1,7 @@
 extern crate core;
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
 
 use std::env;
 use std::io::{self, BufRead};

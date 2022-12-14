@@ -1,0 +1,37 @@
+WHITESPACE = _{ " " | "\t" }
+
+num = @{ ASCII_DIGIT+}
+
+monkeyId = { "Monkey" ~ WHITESPACE* ~ num ~ ":" }
+
+starting_items = {
+    WHITESPACE* ~ "Starting items:" ~ num ~ ("," ~ num)*
+}
+bin_op = _{ add | subtract | multiply | divide }
+    add = { "+" }
+    subtract = { "-" }
+    multiply = { "*" }
+    divide = { "/" }
+
+square = {"old * old"}
+
+operation = {
+    WHITESPACE* ~ "Operation:" ~ "new" ~ "=" ~ (("old" ~ bin_op ~ num) | square)
+}
+
+divisible_by = _{"divisible" ~ WHITESPACE* ~ "by" ~ num}
+
+test = {
+    WHITESPACE* ~ "Test:" ~ WHITESPACE* ~ divisible_by
+}
+
+throw_to = { "throw" ~ WHITESPACE*  ~"to" ~ WHITESPACE* ~ "monkey" ~ WHITESPACE* ~ num}
+
+if_true = {  "If" ~WHITESPACE* ~ "true:" ~ throw_to}
+if_false = {  "If" ~WHITESPACE* ~ "false:" ~ throw_to}
+
+monkey = {
+    monkeyId ~ "\n" ~ starting_items ~ "\n" ~ operation ~ "\n" ~ test ~ "\n" ~ if_true ~ "\n" ~ if_false
+}
+monkeys = _{ SOI ~ monkey ~ ("\n"+ ~ monkey)* ~ EOI }
+
